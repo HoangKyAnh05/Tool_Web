@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DevBlueprint AI - Electron Web Architect</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <!-- Markdown & Diagram Libraries -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Window Drag Header (For Electron titleBarOverlay compatibility) -->
+  <header class="app-header">
+    <div class="header-logo">
+      <i data-lucide="zap" class="logo-icon"></i>
+      <span>DevBlueprint AI</span>
+    </div>
+    <div class="header-status" id="api-status-badge">
+      <span class="status-dot warning"></span>
+      <span class="status-text">Chưa cấu hình API Key</span>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar">
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" data-tab="tab-create">
+          <i data-lucide="plus-circle"></i>
+          <span>Tạo dự án</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-requirements" id="nav-req-btn">
+          <i data-lucide="file-text"></i>
+          <span>Nghiệp vụ & Sơ đồ</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-leads" id="nav-leads-btn">
+          <i data-lucide="trending-up"></i>
+          <span>Cơ hội thị trường</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-history">
+          <i data-lucide="folder-heart"></i>
+          <span>Dự án đã lưu</span>
+        </button>
+        <button class="nav-btn" data-tab="tab-settings">
+          <i data-lucide="settings"></i>
+          <span>Cài đặt</span>
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <p class="app-version">v1.0.0 • Antigravity Ready</p>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-content">
+      
+      <!-- ================= TAB: CREATE PROJECT ================= -->
+      <section id="tab-create" class="tab-panel active">
+        <div class="section-header">
+          <h1 class="glow-text">Thiết Kế Ý Tưởng Dự Án</h1>
+          <p class="subtitle">Khởi tạo ý tưởng, chọn công nghệ và định hình tính năng chính bằng AI</p>
+        </div>
+
+        <div class="card glass-card">
+          <!-- Step 1: Topic -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label for="input-topic"><span class="step-num">1</span> Chủ đề / Ý tưởng Website</label>
+              <div class="ai-button-group">
+                <button class="btn btn-secondary btn-sm" id="btn-suggest-topic">
+                  <i data-lucide="sparkles"></i> AI Gợi ý chủ đề hot
+                </button>
+                <button class="btn btn-secondary btn-sm btn-popularity" id="btn-popularity-topic" title="Xem độ phổ biến trên thị trường">
+                  <i data-lucide="trending-up"></i> Độ phổ biến
+                </button>
+              </div>
+            </div>
+            <textarea id="input-topic" placeholder="Ví dụ: Website đặt lịch phòng khám nha khoa thông minh, tích hợp tư vấn AI và quản lý lịch hẹn tự động..." rows="3"></textarea>
+            
+            <div class="topic-suggestions-container hidden" id="topic-suggestions-box">
+              <p class="suggest-title">Gợi ý chủ đề từ AI:</p>
+              <div class="suggest-tags" id="suggested-topics-list">
+                <!-- Auto-populated by JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Tech Stack -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label><span class="step-num">2</span> Công nghệ (Tech Stack)</label>
+              <div class="ai-button-group">
+                <button class="btn btn-secondary btn-sm" id="btn-suggest-tech">
+                  <i data-lucide="cpu"></i> AI Gợi ý công nghệ tối ưu
+                </button>
+                <button class="btn btn-secondary btn-sm btn-popularity" id="btn-popularity-tech" title="Xem độ phổ biến của Tech Stack">
+                  <i data-lucide="trending-up"></i> Độ phổ biến
+                </button>
+              </div>
+            </div>
+            <div class="tech-selection">
+              <div class="tech-grid" id="tech-checkboxes">
+                <label class="tech-chip"><input type="checkbox" value="Next.js" checked> <span>Next.js</span></label>
+                <label class="tech-chip"><input type="checkbox" value="React" checked> <span>React</span></label>
+                <label class="tech-chip"><input type="checkbox" value="Node.js" checked> <span>Node.js</span></label>
+                <label class="tech-chip"><input type="checkbox" value="FastAPI"> <span>FastAPI</span></label>
+                <label class="tech-chip"><input type="checkbox" value="PostgreSQL" checked> <span>PostgreSQL</span></label>
+                <label class="tech-chip"><input type="checkbox" value="MongoDB"> <span>MongoDB</span></label>
+                <label class="tech-chip"><input type="checkbox" value="TailwindCSS" checked> <span>TailwindCSS</span></label>
+                <label class="tech-chip"><input type="checkbox" value="Docker"> <span>Docker</span></label>
+              </div>
+              <div class="custom-tech-input">
+                <input type="text" id="input-custom-tech" placeholder="Thêm công nghệ khác (ví dụ: Spring Boot, Go, Redis)...">
+                <button class="btn btn-primary btn-sm" id="btn-add-tech">Thêm</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Features selection -->
+          <div class="form-group">
+            <div class="form-label-row">
+              <label><span class="step-num">3</span> Tính năng chi tiết</label>
+              <div class="ai-button-group">
+                <button class="btn btn-secondary btn-sm" id="btn-suggest-features">
+                  <i data-lucide="list-plus"></i> AI Gợi ý tính năng hay
+                </button>
+                <button class="btn btn-secondary btn-sm btn-popularity" id="btn-popularity-features" title="Xem mức độ phổ biến của tính năng">
+                  <i data-lucide="trending-up"></i> Độ phổ biến
+                </button>
+              </div>
+            </div>
+            <div class="features-grid">
+              <div class="feature-col">
+                <div class="col-header">
+                  <i data-lucide="check-square" class="text-primary"></i>
+                  <span>Bắt buộc phải có (Must-Have)</span>
+                </div>
+                <textarea id="features-must" rows="5" placeholder="• Đăng ký/đăng nhập người dùng&#10;• Xem danh sách dịch vụ và bác sĩ&#10;• Chọn lịch hẹn và đặt chỗ..."></textarea>
+              </div>
+              
+              <div class="feature-col">
+                <div class="col-header">
+                  <i data-lucide="star" class="text-secondary"></i>
+                  <span>Nên có thêm (Nice-to-Have)</span>
+                </div>
+                <textarea id="features-nice" rows="5" placeholder="• Tích hợp chatbot tư vấn tự động&#10;• Gửi thông báo nhắc lịch qua SMS/Zalo&#10;• Cổng thanh toán VnPay/Momo..."></textarea>
+              </div>
+            </div>
+          </div>
+
+          <!-- Action Generator -->
+          <div class="action-footer" style="display: flex; gap: 16px; margin-top: 24px; align-items: center;">
+            <button class="btn btn-secondary" id="btn-save-draft-project" style="flex: 1; height: 52px; font-size: 14px; border-radius: 10px; display: inline-flex; align-items: center; justify-content: center;">
+              <i data-lucide="save"></i> Lưu Thiết Kế Ý Tưởng
+            </button>
+            <div style="flex: 2; display: flex; gap: 8px; align-items: center;">
+              <button class="btn btn-action-glow" id="btn-generate-blueprint" style="flex: 1; height: 52px; font-size: 14px; border-radius: 10px; padding: 0 20px; width: auto; margin-top: 0; display: inline-flex; align-items: center; justify-content: center;">
+                <i data-lucide="zap"></i> Tự Động Tạo Nghiệp Vụ & Sơ Đồ
+              </button>
+              <button class="btn btn-secondary btn-popularity" id="btn-popularity-blueprint" style="height: 52px; border-radius: 10px; display: inline-flex; align-items: center; gap: 6px; padding: 0 16px; font-size: 14px; white-space: nowrap;" title="Xem độ phổ biến của loại Website này">
+                <i data-lucide="trending-up"></i> Xem độ phổ biến
+              </button>
+            </div>
+          </div>
+
+          <!-- AI Companion Guide Card -->
+          <div class="card glass-card" style="margin-top: 24px; padding: 20px; border: 1px dashed rgba(99, 102, 241, 0.3); background: rgba(99, 102, 241, 0.03);">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px; cursor: pointer;" onclick="document.getElementById('ai-guide-content').classList.toggle('hidden')">
+              <i data-lucide="help-circle" style="color: #6366f1;"></i>
+              <h3 style="margin: 0; font-size: 1rem; color: var(--text-highlight); display: flex; justify-content: space-between; width: 100%; align-items: center;">
+                Hướng dẫn dùng AI ngoài khi hết token miễn phí
+                <span style="font-size: 0.8rem; opacity: 0.7; font-weight: normal; text-decoration: underline;">Xem chi tiết</span>
+              </h3>
+            </div>
+            <div id="ai-guide-content" class="hidden" style="margin-top: 10px; font-size: 0.9rem; line-height: 1.6; color: var(--text-muted); border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 12px;">
+              <ol style="margin: 0; padding-left: 20px;">
+                <li style="margin-bottom: 8px;">
+                  <strong>Bước 1 - Copy Prompt & Mở AI ngoài:</strong> Click vào nút <i data-lucide="copy" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> (Sao chép Prompt) hoặc biểu tượng <i data-lucide="external-link" style="width: 14px; height: 14px; display: inline-block; vertical-align: middle;"></i> bên cạnh các ô nhập liệu để chọn và mở các công cụ AI như <strong>ChatGPT</strong>, <strong>Claude</strong> hoặc <strong>Google AI Studio</strong>. Hệ thống sẽ tự động sao chép câu lệnh kèm theo ngữ cảnh dự án của bạn vào clipboard.
+                </li>
+                <li style="margin-bottom: 8px;">
+                  <strong>Bước 2 - Hỏi AI ngoài:</strong> Dán (Ctrl + V) prompt vào khung chat của AI ngoài và gửi đi. AI sẽ tạo ra tài liệu chi tiết và sơ đồ hệ thống tương ứng.
+                </li>
+                <li style="margin-bottom: 8px;">
+                  <strong>Bước 3 - Dán kết quả vào App:</strong>
+                  <ul style="margin: 4px 0 0 0; padding-left: 20px; list-style-type: circle;">
+                    <li><strong>Với tài liệu nghiệp vụ:</strong> Vào tab <strong>"Nghiệp vụ & Sơ đồ"</strong> -> click nút <strong>"Nhập/Sửa nghiệp vụ"</strong> mới, dán tài liệu Markdown từ AI ngoài vào và lưu lại.</li>
+                    <li><strong>Với sơ đồ Mermaid:</strong> Chuyển sang phần <strong>"Sơ đồ hệ thống"</strong>, copy phần mã trong khối code <code>```mermaid ... ```</code> của AI ngoài, dán vào ô sửa code Mermaid ở bên trái rồi bấm <strong>"Cập nhật sơ đồ"</strong>.</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>Bước 4 - Tiếp tục nâng cấp và tổng hợp:</strong> Sau khi dán xong, bạn vẫn có thể sử dụng đầy đủ các chức năng nâng cấp, xem cơ hội thị trường và xuất tài liệu bình thường!
+                </li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: REQUIREMENTS & DIAGRAMS ================= -->
+      <section id="tab-requirements" class="tab-panel">
+        <div class="section-header flex-header">
+          <div>
+            <h1 class="glow-text">Tài Liệu Nghiệp Vụ & Sơ Đồ Hệ Thống</h1>
+            <p class="subtitle">Đã phân tích và trực quan hóa toàn bộ hệ thống web bằng AI</p>
+          </div>
+          <div class="header-actions" style="align-items: center; gap: 8px;">
+            <button class="btn btn-secondary" id="btn-copy-requirements">
+              <i data-lucide="copy"></i> Sao chép nghiệp vụ
+            </button>
+            <button class="btn btn-secondary" id="btn-edit-requirements" style="background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); color: #6366f1;">
+              <i data-lucide="edit-3"></i> Nhập/Sửa nghiệp vụ
+            </button>
+            <div class="ai-button-group">
+              <button class="btn btn-success" id="btn-upgrade-requirements">
+                <i data-lucide="arrow-up-circle"></i> Nâng cấp nghiệp vụ nâng cao
+              </button>
+              <button class="btn btn-secondary btn-popularity" id="btn-popularity-upgrade" style="height: 36px; background: rgba(99, 102, 241, 0.1); border-color: rgba(99, 102, 241, 0.2); color: #6366f1; display: inline-flex; align-items: center; gap: 6px;" title="Xem xu hướng nghiệp vụ nâng cấp">
+                <i data-lucide="trending-up"></i> Độ phổ biến
+              </button>
+            </div>
+            <button class="btn btn-primary-gradient" id="btn-export-plan">
+              <i data-lucide="download"></i> Tổng hợp Implementation Plan
+            </button>
+          </div>
+        </div>
+
+        <div class="tab-req-container">
+          <div class="tabs-sub-header">
+            <button class="sub-tab-btn active" data-subtab="subtab-doc">
+              <i data-lucide="file-text"></i> Nghiệp vụ chi tiết
+            </button>
+            <button class="sub-tab-btn" data-subtab="subtab-diagram">
+              <i data-lucide="git-branch"></i> Sơ đồ hệ thống
+            </button>
+          </div>
+
+          <!-- Content view card -->
+          <div class="card glass-card result-card">
+            
+            <div id="subtab-doc" class="subtab-panel active">
+              <textarea id="requirements-markdown-input" class="hidden" style="width: 100%; height: 500px; font-family: monospace; background: rgba(5, 7, 18, 0.4); color: #fff; border: 1px solid rgba(255, 255, 255, 0.08); padding: 16px; border-radius: 12px; resize: vertical; line-height: 1.6; font-size: 13px;" placeholder="Dán tài liệu nghiệp vụ (Markdown) từ AI ngoài vào đây..."></textarea>
+              <div class="markdown-body" id="requirements-rendered">
+                <div class="empty-state">
+                  <i data-lucide="file-question" class="empty-icon"></i>
+                  <h3>Chưa có dữ liệu nghiệp vụ</h3>
+                  <p>Vui lòng điền thông tin và bấm nút <strong>"Tự Động Tạo Nghiệp Vụ & Sơ Đồ"</strong> ở tab Tạo dự án.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Sub-tab 2: Diagram -->
+            <div id="subtab-diagram" class="subtab-panel">
+              <div class="diagram-layout">
+                <!-- Left Column: Source Code Editor -->
+                <div class="diagram-editor-area" style="display: flex; flex-direction: column; gap: 12px; background: rgba(5, 7, 18, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-family: var(--font-title); font-weight: 600; font-size: 14px; color: var(--text-highlight); display: flex; align-items: center; gap: 8px;">
+                      <i data-lucide="code" class="text-primary" style="width: 16px; height: 16px;"></i> Mã nguồn sơ đồ
+                    </span>
+                    <button class="btn btn-primary-gradient btn-sm" id="btn-update-diagram" style="padding: 6px 12px; font-size: 11px;">
+                      <i data-lucide="refresh-cw" style="width: 12px; height: 12px;"></i> Cập nhật
+                    </button>
+                  </div>
+                  <textarea id="mermaid-code-input" style="flex: 1; min-height: 250px; font-family: monospace; font-size: 12px; line-height: 1.5; background: rgba(3, 5, 10, 0.8); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 8px; padding: 12px; resize: vertical;" placeholder="Nhập mã Mermaid tại đây..."></textarea>
+                  <div style="display: flex; justify-content: flex-start;">
+                    <button class="btn btn-secondary btn-sm" id="btn-copy-mermaid">
+                      <i data-lucide="copy" style="width: 12px; height: 12px;"></i> Sao chép mã
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Right Column: Interactive Diagram Preview -->
+                <div class="diagram-preview-area" style="display: flex; flex-direction: column; gap: 12px; background: rgba(5, 7, 18, 0.4); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 16px;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-family: var(--font-title); font-weight: 600; font-size: 14px; color: var(--text-highlight); display: flex; align-items: center; gap: 8px;">
+                      <i data-lucide="eye" class="text-secondary" style="width: 16px; height: 16px;"></i> Xem trước
+                    </span>
+                    <div class="zoom-controls" style="display: flex; align-items: center; gap: 6px;">
+                      <button class="btn btn-secondary btn-sm" id="btn-zoom-out" title="Thu nhỏ" style="padding: 4px 8px;"><i data-lucide="zoom-out" style="width: 14px; height: 14px;"></i></button>
+                      <span id="zoom-badge" class="zoom-badge" style="font-family: var(--font-title); font-size: 11px; font-weight: 600; color: var(--text-muted); background: rgba(255, 255, 255, 0.03); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255, 255, 255, 0.05); min-width: 48px; text-align: center;">100%</span>
+                      <button class="btn btn-secondary btn-sm" id="btn-zoom-in" title="Phóng to" style="padding: 4px 8px;"><i data-lucide="zoom-in" style="width: 14px; height: 14px;"></i></button>
+                      <button class="btn btn-secondary btn-sm" id="btn-zoom-reset" title="Mặc định" style="padding: 4px 8px;"><i data-lucide="maximize-2" style="width: 14px; height: 14px;"></i></button>
+                    </div>
+                  </div>
+                  
+                  <div class="mermaid-viewport" style="flex: 1; min-height: 350px; background: rgba(3, 5, 10, 0.8); border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 8px; overflow: auto; position: relative; padding: 20px;">
+                    <div class="mermaid-wrapper" style="display: inline-block; min-width: 100%; text-align: center;">
+                      <div id="mermaid-render-box" class="mermaid" style="display: inline-block;">
+                        <!-- Mermaid rendered output here -->
+                      </div>
+                    </div>
+                    <div class="empty-state" id="diagram-empty-state" style="padding: 40px 0;">
+                      <i data-lucide="image" class="empty-icon"></i>
+                      <h3>Chưa có sơ đồ hệ thống</h3>
+                      <p>Sơ đồ sẽ được tạo và vẽ tự động bằng Mermaid.js sau khi gen nghiệp vụ thành công.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: MARKET LEADS ================= -->
+      <section id="tab-leads" class="tab-panel">
+        <div class="section-header">
+          <h1 class="glow-text">Cơ Hội Thị Trường & Tham Khảo</h1>
+          <p class="subtitle">Khám phá các web tương tự trên thị trường và tìm kiếm các đối tượng khách hàng tiềm năng</p>
+        </div>
+
+        <div class="leads-layout">
+          <!-- Column 1: Similar web suggestions -->
+          <div class="card glass-card leads-card">
+            <div class="leads-card-header">
+              <i data-lucide="chrome" class="text-primary"></i>
+              <h2>Website Tham Khảo Tương Tự</h2>
+            </div>
+            <p class="leads-desc">Các sản phẩm, nền tảng nổi bật đang hoạt động hiệu quả trong lĩnh vực này:</p>
+            <div class="leads-list" id="similar-webs-list">
+              <div class="empty-leads">
+                <p>Hãy tạo nghiệp vụ để xem các website tham khảo gợi ý.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Column 2: Potential clients list -->
+          <div class="card glass-card leads-card">
+            <div class="leads-card-header">
+              <i data-lucide="map-pin" class="text-secondary"></i>
+              <h2>Khách Hàng Tiềm Năng (Google Maps)</h2>
+            </div>
+            <p class="leads-desc">Các cơ sở kinh doanh, doanh nghiệp có thể cần thuê thiết kế website này tại các khu vực chính:</p>
+            <div class="leads-list" id="target-businesses-list">
+              <div class="empty-leads">
+                <p>Hãy tạo nghiệp vụ để nhận gợi ý từ khóa tìm kiếm khách hàng tiềm năng trên Google Maps.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: SETTINGS ================= -->
+      <section id="tab-settings" class="tab-panel">
+        <div class="section-header">
+          <h1 class="glow-text">Cấu Hình Hệ Thống</h1>
+          <p class="subtitle">Thiết lập kết nối API Key và tùy chỉnh các thông số AI</p>
+        </div>
+
+        <div class="card glass-card settings-card">
+          <div class="form-group">
+            <label for="settings-api-key">Google Gemini API Key</label>
+            <input type="password" id="settings-api-key" placeholder="Nhập API Key của bạn (AI Studio)...">
+            <p class="field-hint">
+              API Key được lưu trữ cục bộ trên máy tính của bạn (localStorage). 
+              Bạn có thể lấy key miễn phí tại <a href="#" id="link-get-api-key">Google AI Studio</a>.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label for="settings-model">Mẫu ngôn ngữ (Model)</label>
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <select id="settings-model" style="flex: 1;">
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Nhanh & Tối ưu - Khuyên dùng)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro (Thông minh vượt trội)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Nhanh & Tiết kiệm)</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Thông minh, phân tích sâu)</option>
+              </select>
+              <button class="btn btn-secondary btn-sm" id="btn-scan-models" style="white-space: nowrap; height: 45px;">
+                <i data-lucide="refresh-cw"></i> Quét Model khả dụng
+              </button>
+            </div>
+            <p class="field-hint" id="scan-models-hint">Bấm "Quét Model" để tải danh sách các model được hỗ trợ bởi API Key của bạn.</p>
+          </div>
+
+          <div class="form-group">
+            <label for="settings-lang">Ngôn ngữ phản hồi của AI</label>
+            <select id="settings-lang">
+              <option value="Vietnamese">Tiếng Việt</option>
+              <option value="English">Tiếng Anh (English)</option>
+            </select>
+          </div>
+
+          <div class="settings-actions">
+            <button class="btn btn-primary-gradient" id="btn-save-settings">
+              <i data-lucide="save"></i> Lưu cài đặt
+            </button>
+            <span class="settings-save-success hidden" id="settings-save-toast">Đã lưu thành công!</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB: HISTORY ================= -->
+      <section id="tab-history" class="tab-panel">
+        <div class="section-header">
+          <h1 class="glow-text">Dự Án Đã Lưu</h1>
+          <p class="subtitle">Quản lý, khôi phục hoặc xem lại các thiết kế nghiệp vụ và sơ đồ trước đó</p>
+        </div>
+
+        <div class="card glass-card">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="margin: 0; font-size: 1.2rem; font-weight: 600;">Danh sách dự án đã lưu</h3>
+            <button class="btn btn-secondary btn-sm" id="btn-save-current-project" style="white-space: nowrap; height: 45px;">
+              <i data-lucide="save"></i> Lưu dự án hiện tại
+            </button>
+          </div>
+
+          <div id="history-list-empty" class="empty-state">
+            <i data-lucide="folder-open" style="width: 48px; height: 48px; opacity: 0.3; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto;"></i>
+            <p style="opacity: 0.7;">Chưa có dự án nào được lưu. Hãy nhập chủ đề và bấm tạo dự án, sau đó lưu lại tại đây!</p>
+          </div>
+
+          <div class="history-grid" id="history-grid-container" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+            <!-- Auto-populated by JS -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Loading Overlay -->
+  <div class="loading-overlay hidden" id="global-loading">
+    <div class="spinner-container">
+      <div class="cyber-spinner"></div>
+      <p class="loading-text" id="global-loading-text">AI đang phân tích ý tưởng của bạn...</p>
+      <span class="loading-sub">Quá trình này có thể mất 15-30 giây</span>
+    </div>
+  </div>
+
+  <!-- Popularity Analysis Modal -->
+  <div class="modal-overlay hidden" id="popularity-modal">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <i data-lucide="trending-up" class="text-primary" style="width: 24px; height: 24px;"></i>
+          <h2 style="margin: 0; font-size: 1.3rem; font-family: var(--font-title); font-weight: 700;" id="popularity-modal-title">Phân tích mức độ phổ biến</h2>
+        </div>
+        <button class="btn-close" id="btn-close-popularity">&times;</button>
+      </div>
+      <div class="modal-body" id="popularity-modal-body">
+        <!-- Content will be auto-populated dynamically -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary btn-sm" id="btn-popularity-google-trends">
+          <i data-lucide="external-link"></i> Xem trên Google Trends
+        </button>
+        <button class="btn btn-primary btn-sm" id="btn-close-popularity-footer">Đóng</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Script initialization -->
+  <script src="renderer.js"></script>
+</body>
+</html>
